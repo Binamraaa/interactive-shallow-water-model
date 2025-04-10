@@ -7,7 +7,7 @@ Web-based interactive simulation of the Shallow Water Equations using Pyodide
 ![Simulation Demo Placeholder](images/simulation_demo.gif)
 <!-- **Action:** Replace above line with path to an actual GIF/screenshot later -->
 
-**Live Interactive Demo:** [**https://<YourUsername>.github.io/<YourRepoName>/web_interface/**](https://<YourUsername>.github.io/<YourRepoName>/web_interface/)
+**Live Interactive Demo:** [**https://binamraaa.github.io/interactive-shallow-water-model/**]( https://binamraaa.github.io/interactive-shallow-water-model/)
 <!-- **Action:** Replace placeholder URL with your actual GitHub Pages link -->
 
 ## Overview
