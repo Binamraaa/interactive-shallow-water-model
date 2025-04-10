@@ -24,6 +24,7 @@ share/python-wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+*.egg*
 MANIFEST
 
 # PyInstaller
@@ -132,6 +133,7 @@ celerybeat.pid
 .venv
 env/
 venv/
+.venv/
 ENV/
 env.bak/
 venv.bak/
@@ -172,3 +174,11 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# IDE / Editor specific
+.vscode/
+.idea/

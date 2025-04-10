@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Shallow Water Model</title>
+    <!-- Pyodide -->
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.1/full/pyodide.js"></script>
+    <!-- Plotly.js -->
+    <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+    <!-- Our CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Interactive Shallow Water Model</h1>
+        <p>Explore geophysical fluid dynamics concepts like rotation, waves, and geostrophic adjustment.</p>
+        <!-- === ADDED HELP BUTTON === -->
+        <button id="helpButton" class="header-button" title="Show Guide & Info">?</button>
+    </header>
+
+    <!-- Main container for Grid layout -->
+    <main class="main-container">
+
+        <!-- Panel for Simulation Controls -->
+        <div id="controls-panel" class="panel">
+            <h2>Simulation Controls</h2>
+            <form>
+                <fieldset>
+                    <legend>Grid & Time</legend>
+                    <div class="control-group">
+                        <label for="ncol">Grid Size (N x N):</label>
+                        <input type="number" id="ncol" value="32" min="8" max="128" step="4" aria-describedby="ncol-desc">
+                        <small id="ncol-desc" class="description">Number of cells (NxN). Higher values increase detail but slow down simulation.</small>
+                    </div>
+                     <div class="control-group">
+                        <label for="dX">Grid Spacing (dX - km):</label> <!-- Changed Unit -->
+                        <input type="number" id="dX" value="20" min="1" max="100" step="1" aria-describedby="dx-desc"> <!-- Value in km -->
+                        <small id="dx-desc" class="description">Width of each grid cell in kilometers. Smaller values increase resolution but require smaller dT for stability.</small>
+                    </div>
+                    <div class="control-group">
+                        <label for="dT">Time Step (dT - secs):</label>
+                        <input type="number" id="dT" value="150" min="1" max="1000" step="1" aria-describedby="dt-desc">
+                        <small id="dt-desc" class="description">RK4 time step duration. Larger values risk instability (CFL). Adjust with grid size/physics.</small>
+                    </div>
+                     <div class="control-group">
+                        <label for="ntAnim">Steps per Frame:</label>
+                        <input type="number" id="ntAnim" value="5" min="1" max="50" step="1" aria-describedby="ntanim-desc">
+                        <small id="ntanim-desc" class="description">Number of simulation steps calculated between screen updates. Higher values speed up *model* time but make animation choppier.</small>
+                    </div>
+                </fieldset>
+
+                <fieldset>
+                    <legend>Initial State & Physics</legend>
+                    <div class="control-group">
+                        <label for="initialPerturbation">Initial Condition:</label>
+                        <select id="initialPerturbation" aria-describedby="init-desc">
+                            <option value="Tower" selected>Tower</option>
+                            <option value="NSGradient">NS Gradient</option>
+                            <option value="EWGradient">EW Gradient</option>
+                            <option value="Random">Random</option>
+                        </select>
+                         <small id="init-desc" class="description">Initial shape of the water surface height anomaly.</small>
+                    </div>
+                    <div class="control-group">
+                        <label for="G">Gravity (G - m/s² x10⁻⁴):</label> <!-- Scaled Unit -->
+                        <input type="number" id="G" value="9.8" min="0.1" max="100" step="0.1" aria-describedby="g-desc"> <!-- Value x10^4 -->
+                        <small id="g-desc" class="description">Gravitational acceleration (scaled by 10⁴). Affects gravity wave speed. Lower values slow down waves, allowing larger dT.</small>
+                    </div>
+                    <div class="control-group">
+                        <label for="HBackground">Mean Depth (H - m):</label>
+                        <input type="number" id="HBackground" value="1000" min="10" max="10000" step="1" aria-describedby="hbg-desc">
+                        <small id="hbg-desc" class="description">Background depth of the fluid layer. Affects gravity wave speed (sqrt(gH)).</small>
+                    </div>
+                    <div class="control-group">
+                        <label for="dragConst">Drag Coeff (x10⁻⁷ /s):</label> <!-- Scaled Unit -->
+                        <input type="number" id="dragConst" value="5" min="0" max="100" step="0.5" aria-describedby="drag-desc"> <!-- Value x10^7 -->
+                        <small id="drag-desc" class="description">Linear bottom drag coefficient (scaled by 10⁷). Dampens motion over time. Higher values = stronger damping.</small>
+                    </div>
+                     <div class="control-group">
+                        <label for="horizontalWrap">Periodic E-W:</label>
+                        <input type="checkbox" id="horizontalWrap" checked aria-describedby="wrap-desc">
+                        <small id="wrap-desc" class="description">Checked: flow wraps East/West (channel). Unchecked: solid walls (basin).</small>
+                    </div>
+                </fieldset>
+
+                 <fieldset>
+                    <legend>Wind Forcing</legend>
+                     <div class="control-group">
+                        <label for="windScheme">Wind Forcing:</label>
+                        <select id="windScheme" aria-describedby="wind-desc">
+                             <option value="" selected>Off</option>
+                             <option value="Uniform">Uniform Eastward</option>
+                             <option value="Curled">Curled (Gyre-inducing)</option>
+                        </select>
+                        <small id="wind-desc" class="description">Applies a zonal wind stress (acceleration). 'Curled' can drive ocean-like gyres.</small>
+                    </div>
+                </fieldset>
+
+                <!-- Execution Controls -->
+                <div class="execution-controls">
+                    <button id="runButton" disabled>Run Simulation</button>
+                    <button id="stopButton" disabled>Stop</button>
+                    <div class="status-display">
+                        <p id="status">Status: Initializing...</p>
+                        <p id="simTime">Simulation Time: 0.00 days</p>
+                    </div>
+                </div>
+            </form>
+        </div> <!-- End controls-panel -->
+
+        <!-- Panel for Visualization -->
+        <div id="visualization-panel" class="panel">
+            <h2>Visualization</h2>
+            <div id="plotlyChart" aria-label="Shallow water height anomaly plot"></div>
+            <fieldset class="viz-controls">
+                 <legend>Color Scale</legend>
+                 <div class="control-group">
+                     <label for="fixedScaleCheckbox">Use Fixed Scale:</label>
+                     <input type="checkbox" id="fixedScaleCheckbox" aria-describedby="fixedScale-desc">
+                     <small id="fixedScale-desc" class="description">Check to use fixed Min/Max below. Unchecked uses dynamic range per frame.</small>
+                 </div>
+                 <div class="control-group">
+                    <label for="zminInput">Fixed Min (H):</label>
+                    <input type="number" id="zminInput" value="-0.5" step="0.1" disabled>
+                 </div>
+                  <div class="control-group">
+                    <label for="zmaxInput">Fixed Max (H):</label>
+                    <input type="number" id="zmaxInput" value="0.5" step="0.1" disabled>
+                 </div>
+            </fieldset>
+        </div> <!-- End visualization-panel -->
+
+        <!-- Panel for Rotation Controls -->
+        <div id="rotation-controls-panel" class="panel">
+             <h2>Rotation</h2>
+              <form>
+                 <fieldset>
+                    <div class="control-group">
+                        <label for="rotationScheme">Rotation Scheme:</label>
+                        <select id="rotationScheme" aria-describedby="rot-desc">
+                             <option value="PlusMinus" selected>PlusMinus (Beta-Plane)</option>
+                             <option value="WithLatitude">With Latitude (Sine)</option>
+                             <option value="Uniform">Uniform (f-Plane)</option>
+                             <option value="Off">Off (No Rotation)</option>
+                        </select>
+                        <small id="rot-desc" class="description">How the Coriolis effect (f) varies. Beta-effect schemes allow Rossby waves.</small>
+                    </div>
+                    <div class="control-group">
+                        <label for="meanLatitude">Mean Latitude (°N):</label>
+                        <input type="number" id="meanLatitude" value="30" min="-90" max="90" step="1" aria-describedby="lat-desc">
+                        <small id="lat-desc" class="description">Reference latitude for Coriolis calculation. Affects overall rotation strength.</small>
+                    </div>
+                     <div class="control-group">
+                        <label for="betaFactor">Beta Factor:</label>
+                        <input type="number" id="betaFactor" value="0.8" min="0" max="5" step="0.1" aria-describedby="beta-desc">
+                        <small id="beta-desc" class="description">Strength of Coriolis variation for 'PlusMinus' scheme (0 = uniform rotation).</small>
+                    </div>
+                 </fieldset>
+             </form>
+        </div> <!-- End rotation-controls-panel -->
+
+    </main> <!-- End main-container -->
+
+    <!-- === ADDED MODAL POPUP === -->
+    <div id="helpModalOverlay" class="modal-overlay hidden"></div>
+    <div id="helpModal" class="modal hidden">
+        <button id="closeHelpModal" class="modal-close-button" title="Close">×</button>
+        <h2>Guide & Information</h2>
+
+        <section>
+            <h3>Overview</h3>
+            <p>This tool simulates the Shallow Water Equations, modeling a thin fluid layer on a rotating plane. It helps visualize core concepts in oceanography and atmospheric science.</p>
+            <p>Adjust parameters in the 'Simulation Controls' panels and click 'Run Simulation'. Observe the 'Height Anomaly' plot, where colors represent deviations from the average water level.</p>
+        </section>
+
+        <section>
+             <h3>Parameters Explained</h3>
+             <dl> <!-- Use Definition List -->
+                 <dt>Grid Size (N x N)</dt>
+                 <dd>Resolution of the simulation grid. More cells = more detail, slower computation.</dd>
+                 <dt>Grid Spacing (dX - km)</dt>
+                 <dd>Physical size of each grid cell. Influences wave speeds and stability limits.</dd>
+                 <dt>Time Step (dT - secs)</dt>
+                 <dd>Simulation time step length. Needs to be small enough for stability (CFL condition), especially with small dX or fast waves (high g, H).</dd>
+                 <dt>Steps per Frame</dt>
+                 <dd>How many simulation steps run between plot updates. Controls animation speed vs. smoothness.</dd>
+                 <dt>Initial Condition</dt>
+                 <dd>Starting shape of the water height anomaly ('Tower', 'NS/EW Gradient', 'Random').</dd>
+                 <dt>Gravity (G)</dt>
+                 <dd>Affects pressure gradient force and gravity wave speed (`sqrt(gH)`). Scaled by 10⁴ in UI for better simulation and model runtime.</dd>
+                 <dt>Mean Depth (H)</dt>
+                 <dd>Background fluid depth. Also affects gravity wave speed.</dd>
+                 <dt>Drag Coeff</dt>
+                 <dd>Frictional damping at the bottom. Slows down motion. Scaled by 10⁷ in UI.</dd>
+                 <dt>Periodic E-W</dt>
+                 <dd>Whether the East/West boundaries connect (like a channel on a sphere) or are solid walls (like a basin).</dd>
+                 <dt>Wind Forcing</dt>
+                 <dd>Applies external force. 'Uniform' pushes everything; 'Curled' input vorticity, driving gyres.</dd>
+                 <dt>Rotation Scheme</dt>
+                 <dd>'Off': No rotation. 'Uniform': Constant Coriolis parameter 'f'. 'PlusMinus'/'WithLatitude': 'f' varies with latitude (the 'beta-effect'), essential for Rossby waves.</dd>
+                 <dt>Mean Latitude</dt>
+                 <dd>Reference latitude for calculating 'f'. Higher latitude = stronger rotation effect.</dd>
+                 <dt>Beta Factor</dt>
+                 <dd>Controls how strongly 'f' varies with latitude in the 'PlusMinus' scheme.</dd>
+                 <dt>Use Fixed Scale</dt>
+                 <dd>Toggles between dynamic color scaling (adjusts each frame) and fixed color scaling using the Min/Max values below.</dd>
+             </dl>
+        </section>
+
+        <section>
+            <h3>Example Simulations & Real-World Links</h3>
+            <h4>1. Geostrophic Adjustment (e.g., Tower, PlusMinus Rotation)</h4>
+            <p>Watch the initial 'Tower' collapse. Flow initially moves outward due to pressure but is deflected by Coriolis, eventually settling into a (near) circular flow *around* the remaining pressure anomaly. This balance between pressure gradient and Coriolis is fundamental to large-scale ocean currents (like the Gulf Stream flowing around the Sargasso Sea high) and atmospheric jet streams.</p>
+            <h4>2. Gravity & Poincaré Waves (e.g., Tower, any Rotation)</h4>
+            <p>Observe ripples propagating away from the initial disturbance. Their speed depends on `sqrt(gH)`. Rotation modifies them into Poincaré waves. These are analogous to waves generated by disturbances like storms or earthquakes (tsunamis in the deep ocean initially behave like shallow water waves).</p>
+            <h4>3. Kelvin Waves (e.g., Tower, No E-W Wrap)</h4>
+            <p>With 'Periodic E-W' unchecked (basin mode), look closely along the N/S walls (and sometimes E/W). You might see wave signals trapped against the boundary, propagating with the boundary on their right (in the Northern Hemisphere convention used here). These are crucial for signals traveling along coastlines or the equator in the real ocean/atmosphere (like El Niño signals).</p>
+            <h4>4. Rossby Waves (e.g., Random/Gradient, Beta-Effect Rotation)</h4>
+             <p>Use a non-uniform 'Rotation Scheme' ('PlusMinus' or 'WithLatitude') and potentially 'Random' initial conditions or a gradient. Look for *slow*, large-scale wave patterns propagating generally *westward*. These depend on the 'beta-effect' and are responsible for meandering jet streams and large-scale planetary wave patterns that influence weather systems for weeks.</p>
+             <h4>5. Wind-Driven Gyres (e.g., Curled Wind, Basin, Low Drag)</h4>
+             <p>Use 'Curled' wind in a basin ('Periodic E-W' unchecked), perhaps with lower 'Drag Coeff'. Over a longer simulation, you should see large-scale circular currents (gyres) spin up, similar to major ocean gyres driven by large-scale wind patterns (like the trade winds and westerlies).</p>
+        </section>
+        <button id="closeHelpModalBottom" class="modal-close-button bottom" title="Close">Close Guide</button>
+    </div>
+    <!-- === END MODAL POPUP === -->
+
+
+    <!-- Defer script loading -->
+    <script src="main.js" defer></script>
+</body>
+</html>

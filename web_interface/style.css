@@ -1,0 +1,377 @@
+/* --- CSS Variables --- */
+:root {
+    --primary-color: #0056b3; /* Darker Blue */
+    --secondary-color: #6c757d; /* Grey */
+    --success-color: #28a745; /* Green */
+    --danger-color: #dc3545; /* Red */
+    --light-bg: #f0f4f8; /* Lighter, slightly blue background */
+    --white-bg: #ffffff;
+    --dark-text: #212529;
+    --light-text: #6c757d;
+    --border-color: #ced4da; /* Slightly darker border */
+    --box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08); /* Softer shadow */
+    --border-radius: 6px; /* Slightly smaller radius */
+}
+
+/* --- General Styles --- */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    background-color: var(--light-bg);
+    color: var(--dark-text);
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+    font-size: 16px; /* Base font size */
+}
+
+header {
+    background: var(--primary-color);
+    color: white;
+    text-align: center;
+    padding: 20px 15px;
+    margin-bottom: 30px; /* More space below header */
+    width: 100%;
+    box-sizing: border-box;
+}
+header h1 { margin: 0 0 5px 0; font-weight: 600; font-size: 1.8em; }
+header p { margin: 0; font-size: 1.05em; opacity: 0.9; }
+
+
+/* --- Layout: CSS Grid for Main Content --- */
+.main-container {
+    display: grid;
+    width: 95%;
+    max-width: 1500px; /* Wider max width */
+    margin: 0 auto 30px auto; /* Center container, add bottom margin */
+    padding: 0;
+    gap: 25px; /* Gap between panels */
+    box-sizing: border-box;
+
+    /* Default: Single column layout */
+    grid-template-columns: 1fr;
+    grid-template-areas:
+        "controls"
+        "visualization"
+        "rotation";
+}
+
+/* Grid layout for wider screens (e.g., > 992px) */
+@media (min-width: 992px) {
+    .main-container {
+        /* Two columns: Controls | Plot+Rotation */
+        grid-template-columns: minmax(360px, 1fr) 2fr; /* Flexible controls (min 360px), plot takes 2x */
+        grid-template-areas:
+            "controls visualization"
+            "controls rotation"; /* Controls span rows, plot above rotation */
+         align-items: start; /* Align top edges */
+    }
+}
+
+/* Assign grid areas to panels */
+#controls-panel { grid-area: controls; }
+#visualization-panel { grid-area: visualization; }
+#rotation-controls-panel { grid-area: rotation; }
+
+
+/* --- Styling for Panels --- */
+.panel { /* Shared panel style */
+    background-color: var(--white-bg);
+    padding: 20px 25px; /* Adjust padding */
+    margin-bottom: 0; /* Grid gap handles spacing */
+    box-shadow: var(--box-shadow);
+    border-radius: var(--border-radius);
+    border: 1px solid var(--border-color);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    height: fit-content; /* Allow panels to size to content */
+}
+
+
+/* --- Panel Headings --- */
+.panel h2 {
+    margin-top: 0;
+    margin-bottom: 25px; /* More space below heading */
+    font-size: 1.25em;
+    font-weight: 600;
+    color: var(--primary-color);
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 10px;
+    width: 100%;
+}
+
+
+/* --- Fieldset & Legend Styling --- */
+fieldset {
+    border: none; /* Remove default fieldset border */
+    padding: 0;
+    margin: 0 0 15px 0; /* Space below fieldset */
+}
+
+legend {
+    font-weight: 600;
+    color: var(--dark-text);
+    padding: 0;
+    margin-bottom: 15px; /* Space below legend */
+    font-size: 1.05em;
+    border-bottom: 1px dashed var(--border-color); /* Subtle separator */
+    width: 100%;
+    display: block; /* Make legend block */
+    padding-bottom: 5px;
+}
+
+/* --- Individual Control Groups Styling --- */
+.control-group {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center; /* Vertically center label and control */
+    margin-bottom: 15px; /* Consistent spacing */
+    width: 100%;
+}
+
+.control-group label {
+    flex: 0 0 150px; /* Consistent label width */
+    text-align: right;
+    margin-right: 15px;
+    color: #333; /* Slightly darker label */
+    font-size: 0.9em;
+    padding-top: 0; /* Remove padding top */
+}
+
+.control-group input[type="number"],
+.control-group select {
+    flex: 1 1 150px; /* Allow control to grow */
+    padding: 8px 10px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius);
+    font-size: 0.95em;
+    min-width: 100px;
+    box-sizing: border-box;
+}
+.control-group select { cursor: pointer; background-color: #fff; }
+
+.control-group input[type="checkbox"] {
+    order: 1; /* Put checkbox visually first within its space */
+    margin-left: 5px; /* Adjust spacing if needed */
+    margin-right: 10px;
+    height: 16px;
+    width: 16px;
+    accent-color: var(--primary-color);
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+
+/* --- Description Text Styling --- */
+.description {
+    flex-basis: 100%;
+    order: 3;
+    margin-top: 6px;
+    padding-left: calc(150px + 15px); /* label width + label margin */
+    font-size: 0.8em;
+    color: var(--light-text);
+    line-height: 1.4;
+}
+
+/* Responsive adjustments for controls/descriptions */
+@media (max-width: 550px) {
+    .control-group {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .control-group label { text-align: left; margin-bottom: 5px; width: 100%; flex-basis: auto; }
+    .control-group input[type="number"],
+    .control-group select { width: 100%; margin-left: 0; }
+    .control-group input[type="checkbox"] { order: 0; width: auto; margin-bottom: 8px; margin-left: 0;}
+    .description { padding-left: 5px; margin-top: 8px; width: calc(100% - 5px); }
+}
+
+
+/* --- Buttons and Status Display --- */
+.execution-controls {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 15px; /* Row and column gap */
+}
+
+.execution-controls button {
+    padding: 10px 20px;
+    cursor: pointer;
+    border: none;
+    border-radius: var(--border-radius);
+    color: white;
+    font-size: 0.95em;
+    font-weight: 500;
+    transition: background-color 0.2s ease, opacity 0.2s ease;
+    margin: 0;
+}
+/* Specific button colors */
+.execution-controls button#runButton { background-color: var(--success-color); }
+.execution-controls button#stopButton { background-color: var(--danger-color); }
+.execution-controls button:hover:not(:disabled) { opacity: 0.85; }
+.execution-controls button:disabled { background-color: #cccccc; cursor: not-allowed; opacity: 0.6; }
+
+.status-display {
+    margin-left: auto; /* Push status right */
+    text-align: right;
+    font-size: 0.9em;
+    padding-left: 15px;
+}
+.status-display p { margin: 2px 0; }
+#status { font-style: italic; color: var(--light-text); }
+#simTime { font-weight: bold; color: var(--dark-text); }
+
+/* Responsive adjustments for execution controls */
+@media (max-width: 600px) {
+    .execution-controls { flex-direction: column; align-items: flex-start; }
+    .status-display { margin-left: 0; text-align: left; margin-top: 10px; }
+}
+
+
+/* --- Plotly Chart Styling --- */
+#visualization-panel #plotlyChart {
+    width: 100%;
+    min-height: 500px;
+    border-radius: var(--border-radius); /* Match panel radius */
+}
+
+/* --- Header Button --- */
+header button#helpButton {
+    position: absolute;
+    top: 15px;
+    right: 20px;
+    background-color: rgba(255, 255, 255, 0.2);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 50%; /* Circular */
+    width: 36px;
+    height: 36px;
+    font-size: 1.2em;
+    font-weight: bold;
+    padding: 0;
+    line-height: 34px; /* Center text */
+    text-align: center;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+header button#helpButton:hover {
+    background-color: rgba(255, 255, 255, 0.3);
+}
+
+/* --- Modal Styles --- */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6); /* Dim background */
+    z-index: 999; /* Below modal, above content */
+    opacity: 1;
+    transition: opacity 0.3s ease-in-out;
+}
+.modal-overlay.hidden {
+    opacity: 0;
+    pointer-events: none; /* Don't block interactions when hidden */
+}
+
+.modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: var(--white-bg);
+    padding: 30px 35px;
+    border-radius: var(--border-radius);
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+    z-index: 1000; /* Above overlay */
+    width: 90%;
+    max-width: 750px; /* Max width for readability */
+    max-height: 85vh; /* Max height */
+    overflow-y: auto; /* Enable scrolling if content exceeds height */
+    opacity: 1;
+    transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out;
+}
+.modal.hidden {
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, -45%); /* Slight move up when hiding */
+}
+
+.modal-close-button {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    background: none;
+    border: none;
+    font-size: 1.8em;
+    font-weight: bold;
+    color: var(--secondary-color);
+    cursor: pointer;
+    padding: 5px;
+    line-height: 1;
+}
+.modal-close-button:hover {
+    color: var(--dark-text);
+}
+.modal-close-button.bottom { /* Style for button at bottom */
+     position: relative; /* Reset absolute positioning */
+     top: auto; right: auto;
+     display: block; /* Make it block to center */
+     margin: 25px auto 0 auto; /* Center horizontally */
+     font-size: 0.9em;
+     font-weight: normal;
+     padding: 8px 15px;
+     background-color: var(--secondary-color);
+     color: white;
+     border-radius: var(--border-radius);
+     transition: background-color 0.2s ease;
+}
+.modal-close-button.bottom:hover {
+    background-color: #5a6268;
+}
+
+
+.modal h2 {
+    margin-top: 0;
+    margin-bottom: 20px;
+    color: var(--primary-color);
+    text-align: center;
+    font-size: 1.6em;
+}
+.modal h3 {
+    margin-top: 25px;
+    margin-bottom: 15px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 8px;
+    color: #444;
+}
+.modal section {
+    margin-bottom: 20px;
+}
+.modal p {
+    margin-bottom: 10px;
+    line-height: 1.7;
+    font-size: 0.95em;
+    color: #555;
+}
+
+/* Definition List Styling */
+.modal dl {
+    margin-left: 5px;
+}
+.modal dt {
+    font-weight: 600;
+    color: var(--dark-text);
+    margin-top: 12px;
+}
+.modal dd {
+    margin-left: 20px; /* Indent description */
+    margin-bottom: 8px;
+    font-size: 0.9em;
+    color: var(--light-text);
+}
