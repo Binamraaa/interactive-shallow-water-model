@@ -4,7 +4,7 @@ Web-based interactive simulation of the Shallow Water Equations using Pyodide
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT) <!-- Optional: Add license badge -->
 
-![Simulation Demo Placeholder](images/simulation_demo.gif)
+![Simulation Demo Placeholder](images/demo.gif)
 <!-- **Action:** Replace above line with path to an actual GIF/screenshot later -->
 
 **Live Interactive Demo:** [**https://binamraaa.github.io/interactive-shallow-water-model/**](https://binamraaa.github.io/interactive-shallow-water-model/)
