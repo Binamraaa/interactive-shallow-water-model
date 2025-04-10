@@ -79,20 +79,21 @@ This model solves the non-linear shallow water equations for a single, homogeneo
 
 The model uses a **staggered grid** where variables are located at different points within a grid cell. This improves numerical stability and accuracy for wave propagation. For a simple 3x3 case (`ncol=3`), the placement is:
 
-  -------V(0,0)-------V(0,1)-------V(0,2)-------
-  |                  |                  |                  |
-U(0,0)    H(0,0)   U(0,1)    H(0,1)   U(0,2)    H(0,2)   [U(0,3)] H(0,3)
-  |                  |                  |                  |
-  -------V(1,0)-------V(1,1)-------V(1,2)-------
-  |                  |                  |                  |
-U(1,0)    H(1,0)   U(1,1)    H(1,1)   U(1,2)    H(1,2)   [U(1,3)] H(1,3)
-  |                  |                  |                  |
-  -------V(2,0)-------V(2,1)-------V(2,2)-------
-  |                  |                  |                  |
-U(2,0)    H(2,0)   U(2,1)    H(2,1)   U(2,2)    H(2,2)   [U(2,3)] H(2,3)
-  |                  |                  |                  |
-  ------[V(3,0)]------[V(3,1)]------[V(3,2)]------
-
+```
+      -------V(0,0)-------V(0,1)-------V(0,2)-------
+      |                  |                  |                  |
+    U(0,0)    H(0,0)   U(0,1)    H(0,1)   U(0,2)    H(0,2)   [U(0,3)] H(0,3)
+      |                  |                  |                  |
+      -------V(1,0)-------V(1,1)-------V(1,2)-------
+      |                  |                  |                  |
+    U(1,0)    H(1,0)   U(1,1)    H(1,1)   U(1,2)    H(1,2)   [U(1,3)] H(1,3)
+      |                  |                  |                  |
+      -------V(2,0)-------V(2,1)-------V(2,2)-------
+      |                  |                  |                  |
+    U(2,0)    H(2,0)   U(2,1)    H(2,1)   U(2,2)    H(2,2)   [U(2,3)] H(2,3)
+      |                  |                  |                  |
+      ------[V(3,0)]------[V(3,1)]------[V(3,2)]------
+```
   
 *   **H(i, j):** Height defined at cell centers.
 *   **U(i, j):** Zonal Velocity (East-West) defined on the vertical faces (West edge of cell i, j+1).
