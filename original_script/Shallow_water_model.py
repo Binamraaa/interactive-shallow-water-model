@@ -8,11 +8,11 @@ import math
 
 # Grid and Variable Initialization -- stuff you might play around with
 
-ncol = 5         # grid size (number of cells)
+ncol = 30         # grid size (number of cells)
 nrow = ncol
 
 nSlices = 400         # maximum number of frames to show in the plot
-ntAnim = 10         # number of time steps for each frame
+ntAnim = 2         # number of time steps for each frame
 
 horizontalWrap = False # determines whether the flow wraps around, connecting
                        # the left and right-hand sides of the grid, or whether
