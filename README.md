@@ -7,7 +7,7 @@ Web-based interactive simulation of the Shallow Water Equations using Pyodide
 ![Simulation Demo Placeholder](images/simulation_demo.gif)
 <!-- **Action:** Replace above line with path to an actual GIF/screenshot later -->
 
-**Live Interactive Demo:** [**https://<YourUsername>.github.io/<YourRepoName>/web_interface/**](https://<YourUsername>.github.io/<YourRepoName>/web_interface/)
+**Live Interactive Demo:** [**https://binamraaa.github.io/interactive-shallow-water-model/**](https://binamraaa.github.io/interactive-shallow-water-model/)
 <!-- **Action:** Replace placeholder URL with your actual GitHub Pages link -->
 
 ## Overview
@@ -82,15 +82,14 @@ A staggered grid is used for numerical stability and accuracy:
 *   **Zonal Velocity (`U`)**: Vertical cell faces (East/West edges).
 *   **Meridional Velocity (`V`)**: Horizontal cell faces (North/South edges).
 
-  ------- V(i+1,j) -------     (North Edge)
-  |                      |
-U(i,j)   H(i,j)        U(i,j+1)  (Row i)
-  |                      |
-  ------- V(i,j) ---------     (South Edge)
-  
-(West Edge)       (East Edge)
-        (column j)
-
+(West Edge) ------- V(i+1,j) -------     (North Edge)
+            |                      |
+            U(i,j)   H(i,j)        U(i,j+1)  (Row i)
+            |                      |
+(East Edge) ------- V(i,j) ---------     (South Edge)
+            
+                  (column j)
+        
 
 ## Features ✨
 
@@ -108,7 +107,7 @@ U(i,j)   H(i,j)        U(i,j+1)  (Row i)
 
 Experience the interactive simulation directly here:
 
-**[https://<YourUsername>.github.io/<YourRepoName>/web_interface/](https://<YourUsername>.github.io/<YourRepoName>/web_interface/)**
+**[https://binamraaa.github.io/interactive-shallow-water-model/](https://binamraaa.github.io/interactive-shallow-water-model/)**
 <!-- **Action:** Replace placeholder URL with your actual GitHub Pages link -->
 
 *(Requires a modern web browser supporting WebAssembly. Initial loading may take a few moments while Pyodide initializes.)*
